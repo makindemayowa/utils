@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Utils</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f0f0f;
+      color: #e5e5e5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 3rem 2rem 1.5rem;
+      border-bottom: 1px solid #1e1e1e;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: #fff;
+    }
+
+    header p {
+      margin-top: 0.35rem;
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    main {
+      flex: 1;
+      padding: 2.5rem 2rem;
+      max-width: 720px;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #444;
+      margin-bottom: 1rem;
+    }
+
+    .apps {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .app-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.1rem 1.25rem;
+      background: #161616;
+      border: 1px solid #222;
+      border-radius: 10px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .app-card:hover {
+      border-color: #444;
+      background: #1c1c1c;
+    }
+
+    .app-icon {
+      font-size: 1.6rem;
+      flex-shrink: 0;
+      width: 2.5rem;
+      text-align: center;
+    }
+
+    .app-info {
+      flex: 1;
+    }
+
+    .app-name {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #f0f0f0;
+    }
+
+    .app-desc {
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 0.2rem;
+    }
+
+    .app-arrow {
+      color: #333;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    footer {
+      padding: 1.5rem 2rem;
+      font-size: 0.75rem;
+      color: #333;
+      border-top: 1px solid #1a1a1a;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>utils</h1>
+    <p>Personal tools</p>
+  </header>
+
+  <main>
+    <div class="section-label">Apps</div>
+    <div class="apps">
+
+      <a href="house-rent/" class="app-card">
+        <div class="app-icon">🏠</div>
+        <div class="app-info">
+          <div class="app-name">Rent Tracker</div>
+          <div class="app-desc">Abeokuta — tenants, payments, expenses</div>
+        </div>
+        <div class="app-arrow">›</div>
+      </a>
+
+    </div>
+  </main>
+
+  <footer>makindemayowa.github.io/utils</footer>
+
+</body>
+</html>

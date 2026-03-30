@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Abeokuta House — Rent Tracker</title>
+  <style>
+    :root {
+      --primary: #1a5276;
+      --primary-light: #2980b9;
+      --success: #1e8449;
+      --warning: #d68910;
+      --danger: #c0392b;
+      --bg: #f0f4f8;
+      --card-bg: #fff;
+      --text: #2c3e50;
+      --muted: #7f8c8d;
+      --border: #dce1e7;
+      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    }
+    .header-title { font-size: 15px; font-weight: 700; }
+    .header-sub { font-size: 11px; opacity: 0.65; margin-top: 1px; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .sync-status {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .sync-ok      { background: rgba(39,174,96,0.25);  color: #a9dfbf; }
+    .sync-saving  { background: rgba(241,196,15,0.25); color: #f9e79f; }
+    .sync-error   { background: rgba(231,76,60,0.25);  color: #f1948a; }
+    .sync-offline { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); }
+    .hbtn {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .hbtn:hover { background: rgba(255,255,255,0.25); }
+
+    /* ── Setup banner ── */
+    .setup-banner {
+      background: #fff3cd;
+      border-bottom: 2px solid #ffc107;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 13px;
+    }
+    .setup-banner strong { color: #856404; }
+    .setup-banner a { color: var(--primary); cursor: pointer; text-decoration: underline; }
+
+    /* ── Tabs ── */
+    .tabs {
+      background: #fff;
+      display: flex;
+      border-bottom: 2px solid var(--border);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tab {
+      padding: 12px 22px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--muted);
+      white-space: nowrap;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+    }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .tab:hover:not(.active) { color: var(--text); background: #f9fafb; }
+
+    /* ── Content ── */
+    .content { padding: 16px; max-width: 1100px; margin: 0 auto; }
+
+    /* ── Loading ── */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 60px 20px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .spinner {
+      width: 22px; height: 22px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Cards ── */
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .card { background: var(--card-bg); border-radius: 10px; padding: 16px; box-shadow: var(--shadow); }
+    .card-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .card-val { font-size: 22px; font-weight: 800; }
+    .card-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .green { color: var(--success); }
+    .red   { color: var(--danger); }
+    .blue  { color: var(--primary); }
+    .amber { color: var(--warning); }
+
+    /* ── Section ── */
+    .section { background: var(--card-bg); border-radius: 10px; box-shadow: var(--shadow); margin-bottom: 16px; overflow: hidden; }
+    .sec-head { padding: 13px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .sec-title { font-weight: 700; font-size: 13px; }
+
+    /* ── Table ── */
+    .tbl-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: #f8f9fa; padding: 9px 12px; text-align: left; font-weight: 700; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafbfc; }
+
+    /* ── Badges ── */
+    .badge { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.2px; }
+    .b-green  { background: #d5f5e3; color: #1e8449; }
+    .b-red    { background: #fadbd8; color: #c0392b; }
+    .b-amber  { background: #fef9e7; color: #d68910; border: 1px solid #f0ca24; }
+    .b-gray   { background: #eaecee; color: #7f8c8d; }
+    .b-blue   { background: #d6eaf8; color: #1a5276; }
+
+    /* ── Buttons ── */
+    .btn { padding: 7px 14px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: opacity 0.15s; }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-success { background: #27ae60; color: #fff; }
+    .btn-ghost   { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-sm      { padding: 5px 11px; font-size: 12px; }
+    .abn { background: none; border: none; cursor: pointer; padding: 3px 6px; border-radius: 4px; font-size: 13px; color: var(--muted); line-height: 1; }
+    .abn:hover { background: #f0f0f0; color: var(--text); }
+
+    /* ── Alerts ── */
+    .alert-list { padding: 10px 14px; }
+    .alert-row { padding: 9px 12px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px; }
+    .alert-row:last-child { margin-bottom: 0; }
+    .ar-red   { background: #fadbd8; color: #922b21; }
+    .ar-amber { background: #fef9e7; color: #7d6608; }
+    .ar-blue  { background: #d6eaf8; color: #1a5276; }
+
+    /* ── Empty state ── */
+    .empty { text-align: center; padding: 40px 20px; color: var(--muted); }
+    .empty-ico { font-size: 36px; margin-bottom: 10px; }
+
+    /* ── Modal ── */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 16px; }
+    .overlay.on { display: flex; }
+    .modal { background: #fff; border-radius: 12px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .modal-hd { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-hd-title { font-weight: 700; font-size: 16px; }
+    .modal-x { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); line-height: 1; padding: 0 4px; }
+    .modal-bd { padding: 20px; }
+    .modal-ft { padding: 13px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+
+    /* ── Form ── */
+    .fg { margin-bottom: 14px; }
+    .fg:last-child { margin-bottom: 0; }
+    label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 5px; }
+    input, select, textarea { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; color: var(--text); background: #fff; outline: none; }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,82,118,0.12); }
+    .fr { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .hint-box { background: #f0f4f8; padding: 8px 12px; border-radius: 6px; font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+    .help-text { font-size: 12px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+
+    @media (max-width: 480px) {
+      .fr { grid-template-columns: 1fr; }
+      .cards { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="header-sub">ABEOKUTA HOUSE</div>
+    <div class="header-title">Rent Tracker</div>
+  </div>
+  <div class="header-right">
+    <div class="sync-status sync-offline" id="sync-status">Not connected</div>
+    <button class="hbtn" onclick="openSettings()">⚙ Settings</button>
+  </div>
+</header>
+
+<div id="setup-banner" style="display:none" class="setup-banner">
+  <span>⚠ <strong>Not connected to Google Sheets.</strong> Data is saved locally only.</span>
+  <a onclick="openSettings()">Connect now →</a>
+</div>
+
+<div class="tabs">
+  <div class="tab active" id="tab-dashboard" onclick="showTab('dashboard')">Dashboard</div>
+  <div class="tab"        id="tab-tenants"   onclick="showTab('tenants')">Tenants</div>
+  <div class="tab"        id="tab-payments"  onclick="showTab('payments')">Payments</div>
+  <div class="tab"        id="tab-expenses"  onclick="showTab('expenses')">Expenses</div>
+</div>
+
+<div class="content">
+  <div id="view-dashboard"></div>
+  <div id="view-tenants"  style="display:none"></div>
+  <div id="view-payments" style="display:none"></div>
+  <div id="view-expenses" style="display:none"></div>
+</div>
+
+<!-- Modal -->
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-hd">
+      <div class="modal-hd-title" id="m-title"></div>
+      <button class="modal-x" onclick="hideModal()">×</button>
+    </div>
+    <div class="modal-bd" id="m-body"></div>
+    <div class="modal-ft" id="m-foot"></div>
+  </div>
+</div>
+
+<script>
+// ─── Config & State ───────────────────────────────────────────────────────────
+const CACHE_KEY  = 'abeokuta-rent-v1';
+const CONFIG_KEY = 'abeokuta-config-v1';
+
+let db     = { tenants: [], payments: [], expenses: [] };
+let config = { scriptUrl: '' };
+let isSyncing = false;
+
+function loadConfig() {
+  try { config = Object.assign({ scriptUrl: '' }, JSON.parse(localStorage.getItem(CONFIG_KEY) || '{}')); } catch(e) {}
+}
+function saveConfig() {
+  localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+}
+
+// ─── Local cache ──────────────────────────────────────────────────────────────
+function loadCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (raw) db = Object.assign({ tenants: [], payments: [], expenses: [] }, JSON.parse(raw));
+  } catch(e) {}
+}
+function writeCache() {
+  localStorage.setItem(CACHE_KEY, JSON.stringify(db));
+}
+
+// ─── Google Sheets sync ───────────────────────────────────────────────────────
+function setSyncStatus(state, text) {
+  const el = document.getElementById('sync-status');
+  el.className = 'sync-status ' + state;
+  el.textContent = text;
+}
+
+async function fetchFromSheets() {
+  if (!config.scriptUrl) return false;
+  try {
+    setSyncStatus('sync-saving', 'Loading…');
+    const res  = await fetch(config.scriptUrl);
+    const data = await res.json();
+    if (!Array.isArray(data.tenants)) throw new Error('Bad response');
+    db = data;
+    writeCache();
+    setSyncStatus('sync-ok', 'Synced ✓');
+    return true;
+  } catch(e) {
+    setSyncStatus('sync-error', 'Sync error');
+    return false;
+  }
+}
+
+async function pushToSheets() {
+  if (!config.scriptUrl || isSyncing) return;
+  isSyncing = true;
+  setSyncStatus('sync-saving', 'Saving…');
+  try {
+    // mode: 'no-cors' is required — Apps Script blocks cross-origin POST otherwise.
+    // The request still goes through; we just can't read the response body.
+    await fetch(config.scriptUrl, {
+      method: 'POST',
+      body: JSON.stringify(db),
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      mode: 'no-cors'
+    });
+    setSyncStatus('sync-ok', 'Saved ✓');
+  } catch(e) {
+    setSyncStatus('sync-error', 'Save failed');
+    console.error('Sheets sync error:', e);
+  } finally {
+    isSyncing = false;
+  }
+}
+
+function save() {
+  writeCache();
+  pushToSheets();
+}
+
+// Auto-refresh every 60s when tab is visible
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') fetchFromSheets().then(render);
+});
+setInterval(() => {
+  if (document.visibilityState === 'visible') fetchFromSheets().then(ok => { if (ok) render(); });
+}, 60000);
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function uid()       { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function todayStr()  { return new Date().toISOString().slice(0, 10); }
+
+function naira(n) {
+  return '₦' + Number(n || 0).toLocaleString('en-NG', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+function fmtDate(s) {
+  if (!s) return '—';
+  const d = new Date(s + 'T12:00:00');
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+function addDays(dateStr, n) {
+  const d = new Date(dateStr + 'T12:00:00');
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+function monthsBetween(start, end) {
+  if (!start || !end) return 1;
+  const diff = (new Date(end + 'T12:00:00') - new Date(start + 'T12:00:00')) / (1000 * 60 * 60 * 24 * 30.4);
+  return Math.max(1, Math.round(diff));
+}
+
+// ─── Tenant helpers ───────────────────────────────────────────────────────────
+function getTenant(id)    { return db.tenants.find(t => t.id === id); }
+function activeTenants()  { return db.tenants.filter(t => t.active); }
+
+function tenantPayments(tenantId) {
+  return db.payments.filter(p => p.tenantId === tenantId).sort((a, b) => b.date.localeCompare(a.date));
+}
+function coveringPayment(tenantId) {
+  const now = todayStr();
+  return tenantPayments(tenantId).find(p => p.periodStart <= now && p.periodEnd >= now) || null;
+}
+function latestPeriodEnd(tenantId) {
+  const pays = tenantPayments(tenantId);
+  if (!pays.length) return null;
+  return pays.reduce((max, p) => p.periodEnd > max ? p.periodEnd : max, '');
+}
+function nextDueDate(tenant) {
+  const latest = latestPeriodEnd(tenant.id);
+  if (!latest) return tenant.moveIn;
+  return addDays(latest, 1);
+}
+function paymentStatus(tenant) {
+  const now      = todayStr();
+  const covering = coveringPayment(tenant.id);
+  if (!covering) {
+    return tenant.moveIn <= now
+      ? { key: 'overdue',  label: 'Overdue',     cls: 'b-red'  }
+      : { key: 'upcoming', label: 'Not started', cls: 'b-gray' };
+  }
+  const months   = monthsBetween(covering.periodStart, covering.periodEnd);
+  const expected = tenant.annualRent * months / 12;
+  const paid     = Number(covering.amount);
+  if (paid < expected * 0.99) return { key: 'partial', label: 'Partial', cls: 'b-amber' };
+  return                              { key: 'paid',    label: 'Paid',    cls: 'b-green' };
+}
+
+// ─── Totals ───────────────────────────────────────────────────────────────────
+function totalCollected() { return db.payments.reduce((s, p) => s + Number(p.amount), 0); }
+function totalExpenses()  { return db.expenses.reduce((s, e) => s + Number(e.amount), 0); }
+function netCash()        { return totalCollected() - totalExpenses(); }
+
+// ─── Tabs ─────────────────────────────────────────────────────────────────────
+let activeTab = 'dashboard';
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('[id^="view-"]').forEach(el => el.style.display = 'none');
+  document.getElementById('view-' + name).style.display = '';
+  activeTab = name;
+  render();
+}
+function render() {
+  if (activeTab === 'dashboard') renderDashboard();
+  if (activeTab === 'tenants')   renderTenants();
+  if (activeTab === 'payments')  renderPayments();
+  if (activeTab === 'expenses')  renderExpenses();
+}
+
+// ─── Dashboard ────────────────────────────────────────────────────────────────
+function renderDashboard() {
+  const el     = document.getElementById('view-dashboard');
+  const active = activeTenants();
+  const net    = netCash();
+  const now    = todayStr();
+  const in30   = addDays(now, 30);
+
+  const overdue  = active.filter(t => paymentStatus(t).key === 'overdue');
+  const partial  = active.filter(t => paymentStatus(t).key === 'partial');
+  const upcoming = active.filter(t => paymentStatus(t).key === 'paid' && nextDueDate(t) <= in30);
+
+  el.innerHTML = `
+    <div class="cards">
+      <div class="card">
+        <div class="card-lbl">Net Cash Available</div>
+        <div class="card-val ${net >= 0 ? 'green' : 'red'}">${naira(net)}</div>
+        <div class="card-sub">Collected − Expenses</div>
+      </div>
+      <div class="card">
+        <div class="card-lbl">Total Collected</div>
+        <div class="card-val blue">${naira(totalCollected())}</div>
+        <div class="card-sub">All time</div>
+      </div>
+      <div class="card">
+        <div class="card-lbl">Total Expenses</div>
+        <div class="card-val amber">${naira(totalExpenses())}</div>
+        <div class="card-sub">All time</div>
+      </div>
+      <div class="card">
+        <div class="card-lbl">Active Tenants</div>
+        <div class="card-val">${active.length}</div>
+        <div class="card-sub">${db.tenants.filter(t => !t.active).length} vacated</div>
+      </div>
+    </div>
+
+    ${overdue.length ? `
+    <div class="section">
+      <div class="sec-head"><span class="sec-title" style="color:var(--danger)">⚠ Overdue (${overdue.length})</span></div>
+      <div class="alert-list">
+        ${overdue.map(t => `<div class="alert-row ar-red">
+          <span><strong>${t.name}</strong> · ${t.unit}</span>
+          <span>${naira(t.annualRent)}/yr · Due since ${fmtDate(nextDueDate(t))}</span>
+        </div>`).join('')}
+      </div>
+    </div>` : ''}
+
+    ${partial.length ? `
+    <div class="section">
+      <div class="sec-head"><span class="sec-title" style="color:var(--warning)">Partial Payments (${partial.length})</span></div>
+      <div class="alert-list">
+        ${partial.map(t => {
+          const cp  = coveringPayment(t.id);
+          const exp = cp ? naira(t.annualRent * monthsBetween(cp.periodStart, cp.periodEnd) / 12) : '?';
+          return `<div class="alert-row ar-amber">
+            <span><strong>${t.name}</strong> · ${t.unit}</span>
+            <span>Paid ${cp ? naira(cp.amount) : '?'} of ${exp}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>` : ''}
+
+    ${upcoming.length ? `
+    <div class="section">
+      <div class="sec-head"><span class="sec-title" style="color:var(--primary)">Renewals Due (next 30 days)</span></div>
+      <div class="alert-list">
+        ${upcoming.map(t => `<div class="alert-row ar-blue">
+          <span><strong>${t.name}</strong> · ${t.unit}</span>
+          <span>Due ${fmtDate(nextDueDate(t))}</span>
+        </div>`).join('')}
+      </div>
+    </div>` : ''}
+
+    ${(() => {
+      const good = active.filter(t => paymentStatus(t).key === 'paid' && nextDueDate(t) > in30);
+      if (!good.length) return '';
+      return `
+    <div class="section">
+      <div class="sec-head"><span class="sec-title" style="color:var(--success)">✓ All Good (${good.length})</span><span style="font-size:12px;color:var(--muted)">No rent due within 30 days</span></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Tenant</th><th>Unit</th><th>Rent/yr</th><th>Next Due</th></tr></thead>
+          <tbody>
+            ${good.sort((a,b) => nextDueDate(a).localeCompare(nextDueDate(b))).map(t => `
+            <tr>
+              <td>${t.name}</td>
+              <td>${t.unit}</td>
+              <td>${naira(t.annualRent)}</td>
+              <td style="color:var(--success)">${fmtDate(nextDueDate(t))}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+    })()}
+  `;
+}
+
+// ─── Tenants ──────────────────────────────────────────────────────────────────
+function renderTenants() {
+  const el  = document.getElementById('view-tenants');
+  const all = [...db.tenants].sort((a, b) => a.unit.localeCompare(b.unit, undefined, { numeric: true }));
+
+  el.innerHTML = `
+    <div class="section">
+      <div class="sec-head">
+        <span class="sec-title">All Tenants (${all.length})</span>
+        <button class="btn btn-primary btn-sm" onclick="openTenantForm()">+ Add Tenant</button>
+      </div>
+      <div class="tbl-wrap">
+        ${all.length === 0
+          ? `<div class="empty"><div class="empty-ico">🏠</div><div>No tenants yet.</div></div>`
+          : `<table>
+              <thead><tr>
+                <th>Unit</th><th>Name</th><th>Phone</th>
+                <th>Move-In</th><th>Move-Out</th><th>Rent/yr</th>
+                <th>Status</th><th>Payment</th><th></th>
+              </tr></thead>
+              <tbody>
+                ${all.map(t => {
+                  const ps = t.active ? paymentStatus(t) : null;
+                  return `<tr>
+                    <td><strong>${t.unit}</strong></td>
+                    <td>${t.name}</td>
+                    <td>${t.phone || '—'}</td>
+                    <td>${fmtDate(t.moveIn)}</td>
+                    <td>${t.moveOut ? fmtDate(t.moveOut) : '—'}</td>
+                    <td>${naira(t.annualRent)}</td>
+                    <td>${t.active ? '<span class="badge b-green">Active</span>' : '<span class="badge b-gray">Vacated</span>'}</td>
+                    <td>${ps ? `<span class="badge ${ps.cls}">${ps.label}</span>` : '—'}</td>
+                    <td style="white-space:nowrap">
+                      <button class="abn" title="Edit" onclick="openTenantForm('${t.id}')">✏</button>
+                      ${t.active ? `<button class="abn" title="Record payment" style="color:var(--success)" onclick="openPaymentForm('${t.id}')">₦</button>` : ''}
+                      ${t.active ? `<button class="abn" title="Mark vacated" onclick="vacateTenant('${t.id}')">🚪</button>` : ''}
+                      <button class="abn" title="Delete" style="color:var(--danger)" onclick="deleteTenant('${t.id}')">🗑</button>
+                    </td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>`}
+      </div>
+    </div>
+  `;
+}
+
+function openTenantForm(id) {
+  const t = id ? getTenant(id) : null;
+  document.getElementById('m-title').textContent = t ? 'Edit Tenant' : 'Add Tenant';
+  document.getElementById('m-body').innerHTML = `
+    <div class="fr">
+      <div class="fg"><label>Unit / Flat No.</label><input id="f-unit" value="${t ? t.unit : ''}" placeholder="e.g. Flat 1"></div>
+      <div class="fg"><label>Annual Rent (₦)</label><input id="f-rent" type="number" value="${t ? t.annualRent : ''}" placeholder="e.g. 450000"></div>
+    </div>
+    <div class="fg"><label>Full Name</label><input id="f-name" value="${t ? t.name : ''}" placeholder="e.g. Ade Balogun"></div>
+    <div class="fg"><label>Phone Number</label><input id="f-phone" value="${t ? (t.phone || '') : ''}" placeholder="e.g. 0801 234 5678"></div>
+    <div class="fr">
+      <div class="fg"><label>Move-In Date</label><input id="f-movein" type="date" value="${t ? t.moveIn : ''}"></div>
+      <div class="fg"><label>Move-Out Date</label><input id="f-moveout" type="date" value="${t ? (t.moveOut || '') : ''}"></div>
+    </div>
+  `;
+  document.getElementById('m-foot').innerHTML = `
+    <button class="btn btn-ghost" onclick="hideModal()">Cancel</button>
+    <button class="btn btn-primary" onclick="saveTenant('${id || ''}')">${t ? 'Save Changes' : 'Add Tenant'}</button>
+  `;
+  showModal();
+}
+
+function saveTenant(id) {
+  const unit    = document.getElementById('f-unit').value.trim();
+  const name    = document.getElementById('f-name').value.trim();
+  const rent    = parseFloat(document.getElementById('f-rent').value);
+  const phone   = document.getElementById('f-phone').value.trim();
+  const moveIn  = document.getElementById('f-movein').value;
+  const moveOut = document.getElementById('f-moveout').value;
+
+  if (!unit || !name || !rent || !moveIn) { alert('Please fill in Unit, Name, Annual Rent, and Move-In Date.'); return; }
+
+  if (id) {
+    const t = getTenant(id);
+    Object.assign(t, { unit, name, phone, moveIn, moveOut: moveOut || '', annualRent: rent, active: !moveOut || moveOut > todayStr() });
+  } else {
+    db.tenants.push({ id: uid(), unit, name, phone, moveIn, moveOut: moveOut || '', annualRent: rent, active: !moveOut || moveOut > todayStr() });
+  }
+  save(); hideModal(); render();
+}
+
+function vacateTenant(id) {
+  const date = prompt('Move-out date (YYYY-MM-DD):', todayStr());
+  if (!date) return;
+  const t = getTenant(id);
+  t.moveOut = date;
+  t.active  = false;
+  save(); render();
+}
+
+function deleteTenant(id) {
+  if (!confirm('Delete this tenant? Their payment records will remain.')) return;
+  db.tenants = db.tenants.filter(t => t.id !== id);
+  save(); render();
+}
+
+// ─── Payments ─────────────────────────────────────────────────────────────────
+function renderPayments() {
+  const el   = document.getElementById('view-payments');
+  const pays = [...db.payments].sort((a, b) => b.date.localeCompare(a.date));
+
+  el.innerHTML = `
+    <div class="section">
+      <div class="sec-head">
+        <span class="sec-title">Payment Records (${pays.length})</span>
+        <button class="btn btn-success btn-sm" onclick="openPaymentForm()">+ Record Payment</button>
+      </div>
+      <div class="tbl-wrap">
+        ${pays.length === 0
+          ? `<div class="empty"><div class="empty-ico">💰</div><div>No payments recorded yet.</div></div>`
+          : `<table>
+              <thead><tr>
+                <th>Date</th><th>Tenant</th><th>Unit</th>
+                <th>Amount Paid</th><th>Expected</th><th>Period Covered</th>
+                <th>Type</th><th>Notes</th><th></th>
+              </tr></thead>
+              <tbody>
+                ${pays.map(p => {
+                  const t      = getTenant(p.tenantId);
+                  const months = monthsBetween(p.periodStart, p.periodEnd);
+                  const exp    = t ? naira(t.annualRent * months / 12) : '—';
+                  const tcls   = p.type === 'Full' ? 'b-green' : p.type === 'Partial' ? 'b-amber' : 'b-blue';
+                  return `<tr>
+                    <td>${fmtDate(p.date)}</td>
+                    <td>${t ? t.name : '—'}</td>
+                    <td>${t ? t.unit : '—'}</td>
+                    <td><strong>${naira(p.amount)}</strong></td>
+                    <td style="color:var(--muted)">${exp}</td>
+                    <td style="white-space:nowrap;font-size:12px">${fmtDate(p.periodStart)} → ${fmtDate(p.periodEnd)}</td>
+                    <td><span class="badge ${tcls}">${p.type}</span></td>
+                    <td style="color:var(--muted);font-size:12px">${p.notes || '—'}</td>
+                    <td style="white-space:nowrap">
+                      <button class="abn" title="Edit" onclick="openPaymentForm(null,'${p.id}')">✏</button>
+                      <button class="abn" style="color:var(--danger)" title="Delete" onclick="deletePayment('${p.id}')">🗑</button>
+                    </td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>`}
+      </div>
+    </div>
+  `;
+}
+
+function openPaymentForm(preId, editId) {
+  const p      = editId ? db.payments.find(x => x.id === editId) : null;
+  const active = activeTenants();
+  const selId  = p ? p.tenantId : preId;
+
+  document.getElementById('m-title').textContent = p ? 'Edit Payment' : 'Record Payment';
+  document.getElementById('m-body').innerHTML = `
+    <div class="fg">
+      <label>Tenant</label>
+      <select id="f-pid" onchange="updatePaymentHint()">
+        <option value="">— Select tenant —</option>
+        ${db.tenants.map(t => `<option value="${t.id}" ${t.id === selId ? 'selected' : ''}>${t.name} (${t.unit})</option>`).join('')}
+      </select>
+    </div>
+    <div id="p-hint"></div>
+    <div class="fr">
+      <div class="fg"><label>Date Received</label><input id="f-pdate" type="date" value="${p ? p.date : todayStr()}"></div>
+      <div class="fg"><label>Amount Paid (₦)</label><input id="f-pamt" type="number" value="${p ? p.amount : ''}" placeholder="e.g. 50000" oninput="autoType()"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label>Period From</label><input id="f-pstart" type="date" value="${p ? p.periodStart : ''}" oninput="autoType()"></div>
+      <div class="fg"><label>Period To</label><input id="f-pend" type="date" value="${p ? p.periodEnd : ''}" oninput="autoType()"></div>
+    </div>
+    <div class="fg">
+      <label>Payment Type</label>
+      <select id="f-ptype">
+        ${['Full','Partial','Advance'].map(v => `<option ${p && p.type === v ? 'selected' : ''}>${v}</option>`).join('')}
+      </select>
+    </div>
+    <div class="fg"><label>Notes (optional)</label><input id="f-pnotes" value="${p ? (p.notes || '') : ''}" placeholder="e.g. Bank transfer, ref 12345"></div>
+  `;
+  document.getElementById('m-foot').innerHTML = `
+    <button class="btn btn-ghost" onclick="hideModal()">Cancel</button>
+    <button class="btn btn-success" onclick="savePayment('${editId || ''}')">${p ? 'Save Changes' : 'Record Payment'}</button>
+  `;
+  showModal();
+  if (selId) updatePaymentHint();
+}
+
+function updatePaymentHint() {
+  const id   = document.getElementById('f-pid').value;
+  const hint = document.getElementById('p-hint');
+  if (!id) { hint.innerHTML = ''; return; }
+  const t  = getTenant(id);
+  const nd = nextDueDate(t);
+  hint.innerHTML = `<div class="hint-box">Annual rent: <strong>${naira(t.annualRent)}</strong> · Next due: <strong>${fmtDate(nd)}</strong></div>`;
+  document.getElementById('f-pstart').value = nd;
+}
+
+function autoType() {
+  const id = document.getElementById('f-pid').value;
+  if (!id) return;
+  const t      = getTenant(id);
+  const amount = parseFloat(document.getElementById('f-pamt').value) || 0;
+  const start  = document.getElementById('f-pstart').value;
+  const end    = document.getElementById('f-pend').value;
+  if (!start || !end || !amount) return;
+  const expected = t.annualRent * monthsBetween(start, end) / 12;
+  const sel      = document.getElementById('f-ptype');
+  if (amount >= expected * 1.01)      sel.value = 'Advance';
+  else if (amount >= expected * 0.99) sel.value = 'Full';
+  else                                sel.value = 'Partial';
+}
+
+function savePayment(editId) {
+  const tenantId    = document.getElementById('f-pid').value;
+  const date        = document.getElementById('f-pdate').value;
+  const amount      = parseFloat(document.getElementById('f-pamt').value);
+  const periodStart = document.getElementById('f-pstart').value;
+  const periodEnd   = document.getElementById('f-pend').value;
+  const type        = document.getElementById('f-ptype').value;
+  const notes       = document.getElementById('f-pnotes').value.trim();
+
+  if (!tenantId || !date || !amount || !periodStart || !periodEnd) { alert('Please fill in all required fields.'); return; }
+  if (periodEnd < periodStart) { alert('"Period To" must be after "Period From".'); return; }
+
+  if (editId) {
+    const p = db.payments.find(x => x.id === editId);
+    Object.assign(p, { tenantId, date, amount, periodStart, periodEnd, type, notes });
+  } else {
+    db.payments.push({ id: uid(), tenantId, date, amount, periodStart, periodEnd, type, notes });
+  }
+  save(); hideModal(); render();
+}
+
+function deletePayment(id) {
+  if (!confirm('Delete this payment record?')) return;
+  db.payments = db.payments.filter(p => p.id !== id);
+  save(); render();
+}
+
+// ─── Expenses ─────────────────────────────────────────────────────────────────
+function renderExpenses() {
+  const el   = document.getElementById('view-expenses');
+  const exps = [...db.expenses].sort((a, b) => b.date.localeCompare(a.date));
+
+  el.innerHTML = `
+    <div class="section">
+      <div class="sec-head">
+        <span class="sec-title">Expenses — <span style="color:var(--warning)">${naira(totalExpenses())}</span></span>
+        <button class="btn btn-primary btn-sm" onclick="openExpenseForm()">+ Add Expense</button>
+      </div>
+      <div class="tbl-wrap">
+        ${exps.length === 0
+          ? `<div class="empty"><div class="empty-ico">🧾</div><div>No expenses recorded yet.</div></div>`
+          : `<table>
+              <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th></th></tr></thead>
+              <tbody>
+                ${exps.map(e => `<tr>
+                  <td>${fmtDate(e.date)}</td>
+                  <td><span class="badge b-gray">${e.category}</span></td>
+                  <td>${e.description}</td>
+                  <td><strong>${naira(e.amount)}</strong></td>
+                  <td><button class="abn" style="color:var(--danger)" onclick="deleteExpense('${e.id}')">🗑</button></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>`}
+      </div>
+    </div>
+  `;
+}
+
+function openExpenseForm() {
+  document.getElementById('m-title').textContent = 'Add Expense';
+  document.getElementById('m-body').innerHTML = `
+    <div class="fg"><label>Date</label><input id="f-edate" type="date" value="${todayStr()}"></div>
+    <div class="fg">
+      <label>Category</label>
+      <select id="f-ecat">
+        <option>Repairs</option><option>Maintenance</option><option>Utility</option>
+        <option>Agent Fee</option><option>Government / Tax</option><option>Other</option>
+      </select>
+    </div>
+    <div class="fg"><label>Description</label><input id="f-edesc" placeholder="e.g. Roof repair in Flat 3"></div>
+    <div class="fg"><label>Amount (₦)</label><input id="f-eamt" type="number" placeholder="e.g. 15000"></div>
+  `;
+  document.getElementById('m-foot').innerHTML = `
+    <button class="btn btn-ghost" onclick="hideModal()">Cancel</button>
+    <button class="btn btn-primary" onclick="saveExpense()">Add Expense</button>
+  `;
+  showModal();
+}
+
+function saveExpense() {
+  const date        = document.getElementById('f-edate').value;
+  const category    = document.getElementById('f-ecat').value;
+  const description = document.getElementById('f-edesc').value.trim();
+  const amount      = parseFloat(document.getElementById('f-eamt').value);
+  if (!date || !description || !amount) { alert('Please fill in all fields.'); return; }
+  db.expenses.push({ id: uid(), date, category, description, amount });
+  save(); hideModal(); render();
+}
+
+function deleteExpense(id) {
+  if (!confirm('Delete this expense?')) return;
+  db.expenses = db.expenses.filter(e => e.id !== id);
+  save(); render();
+}
+
+// ─── Settings ─────────────────────────────────────────────────────────────────
+function openSettings() {
+  document.getElementById('m-title').textContent = 'Google Sheets Connection';
+  document.getElementById('m-body').innerHTML = `
+    <div class="fg">
+      <label>Apps Script Deployment URL</label>
+      <input id="f-url" value="${config.scriptUrl}" placeholder="https://script.google.com/macros/s/…/exec">
+      <div class="help-text">
+        To get this URL:<br>
+        1. Open your Google Sheet<br>
+        2. <strong>Extensions → Apps Script</strong><br>
+        3. Paste the code from <code>apps-script.gs</code> and save<br>
+        4. Click <strong>Deploy → New deployment</strong><br>
+        5. Type: <em>Web app</em> · Execute as: <em>Me</em> · Access: <em>Anyone</em><br>
+        6. Copy the URL and paste it above
+      </div>
+    </div>
+  `;
+  document.getElementById('m-foot').innerHTML = `
+    <label class="btn btn-ghost" style="cursor:pointer;margin-right:auto">
+      📂 Import data file
+      <input type="file" accept=".json" style="display:none" onchange="importFromFile(event)">
+    </label>
+    <button class="btn btn-ghost" onclick="hideModal()">Cancel</button>
+    <button class="btn btn-primary" onclick="saveSettings()">Save & Connect</button>
+  `;
+  showModal();
+}
+
+async function saveSettings() {
+  const url = document.getElementById('f-url').value.trim();
+  if (!url) { alert('Please enter the Apps Script URL.'); return; }
+  if (!url.includes('script.google.com')) { alert('That does not look like an Apps Script URL.'); return; }
+  config.scriptUrl = url;
+  saveConfig();
+  hideModal();
+  document.getElementById('setup-banner').style.display = 'none';
+
+  const ok = await fetchFromSheets();
+  if (ok) {
+    render();
+  } else {
+    alert('Connected but could not load data. Check that the Apps Script is deployed with "Anyone" access and try again.');
+  }
+}
+
+// ─── Import from file ─────────────────────────────────────────────────────────
+function importFromFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data.tenants) || !Array.isArray(data.payments) || !Array.isArray(data.expenses)) {
+        alert('Invalid file format.'); return;
+      }
+      const msg = `Load this data?\n\n• ${data.tenants.length} tenants\n• ${data.payments.length} payments\n• ${data.expenses.length} expenses\n\nThis will replace any existing data.`;
+      if (!confirm(msg)) return;
+      db = data;
+      save();
+      hideModal();
+      render();
+      alert('Data loaded! It will sync to Google Sheets automatically if you are connected.');
+    } catch(err) {
+      alert('Could not read file.');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ─── Modal ────────────────────────────────────────────────────────────────────
+function showModal()  { document.getElementById('overlay').classList.add('on'); }
+function hideModal()  { document.getElementById('overlay').classList.remove('on'); }
+function overlayClick(e) { if (e.target === document.getElementById('overlay')) hideModal(); }
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+loadConfig();
+loadCache();
+
+if (!config.scriptUrl) {
+  document.getElementById('setup-banner').style.display = 'flex';
+  setSyncStatus('sync-offline', 'Not connected');
+  render();
+} else {
+  setSyncStatus('sync-saving', 'Loading…');
+  fetchFromSheets().then(ok => {
+    if (!ok) setSyncStatus('sync-error', 'Sync error');
+    render();
+  });
+}
+</script>
+</body>
+</html>

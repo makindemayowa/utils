@@ -1,0 +1,765 @@
+{
+  "tenants": [
+    {
+      "id": "seed_1bb94b986fb9",
+      "unit": "Flat 4 (2-Bed)",
+      "name": "Ajibade Pelumi",
+      "phone": "08131156941",
+      "moveIn": "2023-05-01",
+      "moveOut": "",
+      "annualRent": 450000,
+      "active": true
+    },
+    {
+      "id": "seed_0b6cca1c15d3",
+      "unit": "Flat 1 (R&P)",
+      "name": "Olabiyi Banker",
+      "phone": "08037872706",
+      "moveIn": "2021-07-01",
+      "moveOut": "",
+      "annualRent": 345000,
+      "active": true
+    },
+    {
+      "id": "seed_7751c66c4781",
+      "unit": "Flat 6 (R&P)",
+      "name": "Akingbade Olawale",
+      "phone": "08089834635",
+      "moveIn": "2025-06-24",
+      "moveOut": "",
+      "annualRent": 350000,
+      "active": true
+    },
+    {
+      "id": "seed_b5d27ab7eae6",
+      "unit": "Flat 2 (Self Con)",
+      "name": "Osoko Sodiq",
+      "phone": "08067042399",
+      "moveIn": "2025-05-28",
+      "moveOut": "",
+      "annualRent": 250000,
+      "active": true
+    },
+    {
+      "id": "seed_637b0d240992",
+      "unit": "Flat 3 (Self Con)",
+      "name": "Melly Herlady",
+      "phone": "08154886404",
+      "moveIn": "2023-04-04",
+      "moveOut": "",
+      "annualRent": 200000,
+      "active": true
+    },
+    {
+      "id": "seed_9ba07715b4d3",
+      "unit": "Flat 5 (Self Con)",
+      "name": "Babalola Tosin",
+      "phone": "09017165512",
+      "moveIn": "2025-05-28",
+      "moveOut": "",
+      "annualRent": 250000,
+      "active": true
+    },
+    {
+      "id": "seed_92077cd06dc4",
+      "unit": "Flat 7 (Self Con)",
+      "name": "Grace Sipeolu",
+      "phone": "08083341897",
+      "moveIn": "2024-12-07",
+      "moveOut": "",
+      "annualRent": 200000,
+      "active": true
+    },
+    {
+      "id": "seed_1903fdc9098e",
+      "unit": "Flat 8 (Self Con)",
+      "name": "Mobola",
+      "phone": "07068058868",
+      "moveIn": "2023-08-10",
+      "moveOut": "2024-09-01",
+      "annualRent": 200000,
+      "active": false
+    },
+    {
+      "id": "seed_d333f512e3a0",
+      "unit": "Flat 9 (R&P)",
+      "name": "Corper Sandra",
+      "phone": "08092609150",
+      "moveIn": "2024-04-15",
+      "moveOut": "2025-01-01",
+      "annualRent": 312000,
+      "active": false
+    },
+    {
+      "id": "seed_bc30c7b923d4",
+      "unit": "Flat 10 (R&P)",
+      "name": "Anike",
+      "phone": "09067219476",
+      "moveIn": "2024-05-17",
+      "moveOut": "2025-02-01",
+      "annualRent": 312000,
+      "active": false
+    },
+    {
+      "id": "seed_e14839d18211",
+      "unit": "Flat 11 (Self Con)",
+      "name": "Olorunfemi Tayo",
+      "phone": "08168262613",
+      "moveIn": "2023-04-26",
+      "moveOut": "2025-01-01",
+      "annualRent": 200000,
+      "active": false
+    },
+    {
+      "id": "seed_3f7699c5734c",
+      "unit": "Flat 12 (R&P Self)",
+      "name": "Odebunmi Oyindamola",
+      "phone": "08103600169",
+      "moveIn": "2023-03-31",
+      "moveOut": "2024-03-31",
+      "annualRent": 280000,
+      "active": false
+    },
+    {
+      "id": "seed_57d8adf1f2cf",
+      "unit": "Flat 13 (R&P Self)",
+      "name": "Amara Taiwo",
+      "phone": "09097757894",
+      "moveIn": "2023-04-28",
+      "moveOut": "2024-04-28",
+      "annualRent": 280000,
+      "active": false
+    }
+  ],
+  "payments": [
+    {
+      "id": "seed_dc160179acdf",
+      "tenantId": "seed_3f7699c5734c",
+      "date": "2023-03-31",
+      "amount": 280000,
+      "periodStart": "2023-03-31",
+      "periodEnd": "2024-03-30",
+      "type": "Full",
+      "notes": "Annual rent"
+    },
+    {
+      "id": "seed_107eaef72827",
+      "tenantId": "seed_57d8adf1f2cf",
+      "date": "2023-04-28",
+      "amount": 280000,
+      "periodStart": "2023-04-28",
+      "periodEnd": "2024-04-27",
+      "type": "Full",
+      "notes": "Annual rent"
+    },
+    {
+      "id": "seed_58bc7fbcecdb",
+      "tenantId": "seed_e14839d18211",
+      "date": "2023-04-26",
+      "amount": 200000,
+      "periodStart": "2023-04-26",
+      "periodEnd": "2024-04-25",
+      "type": "Full",
+      "notes": "Annual rent (recorded as YOMI in file)"
+    },
+    {
+      "id": "seed_57f742a05191",
+      "tenantId": "seed_637b0d240992",
+      "date": "2023-04-04",
+      "amount": 200000,
+      "periodStart": "2023-04-04",
+      "periodEnd": "2024-03-31",
+      "type": "Full",
+      "notes": "Annual rent"
+    },
+    {
+      "id": "seed_cea5008244d0",
+      "tenantId": "seed_1bb94b986fb9",
+      "date": "2023-05-01",
+      "amount": 450000,
+      "periodStart": "2023-05-01",
+      "periodEnd": "2024-04-30",
+      "type": "Full",
+      "notes": "Annual rent"
+    },
+    {
+      "id": "seed_70a0d7a02a5f",
+      "tenantId": "seed_1903fdc9098e",
+      "date": "2023-10-25",
+      "amount": 60000,
+      "periodStart": "2023-08-10",
+      "periodEnd": "2024-08-09",
+      "type": "Partial",
+      "notes": "Partial payment — ₦140,000 outstanding. 2024 record shows additional ₦90,000 received (undated)"
+    },
+    {
+      "id": "seed_a9fc63188984",
+      "tenantId": "seed_0b6cca1c15d3",
+      "date": "2024-03-31",
+      "amount": 200000,
+      "periodStart": "2024-03-31",
+      "periodEnd": "2025-03-30",
+      "type": "Full",
+      "notes": "Annual rent (at Room Self rate — upgraded to R&P in 2025)"
+    },
+    {
+      "id": "seed_7e09b7862197",
+      "tenantId": "seed_e14839d18211",
+      "date": "2024-03-31",
+      "amount": 200000,
+      "periodStart": "2024-03-31",
+      "periodEnd": "2025-03-30",
+      "type": "Full",
+      "notes": "Annual rent"
+    },
+    {
+      "id": "seed_0081436c0e64",
+      "tenantId": "seed_637b0d240992",
+      "date": "2024-03-31",
+      "amount": 150000,
+      "periodStart": "2024-03-31",
+      "periodEnd": "2025-03-30",
+      "type": "Partial",
+      "notes": "Partial — ₦50,000 short of ₦200,000 annual"
+    },
+    {
+      "id": "seed_760be1da4765",
+      "tenantId": "seed_637b0d240992",
+      "date": "2024-05-23",
+      "amount": 100000,
+      "periodStart": "2024-03-31",
+      "periodEnd": "2025-03-30",
+      "type": "Partial",
+      "notes": "Balance payment toward 2024 period"
+    },
+    {
+      "id": "seed_0608f97d415e",
+      "tenantId": "seed_637b0d240992",
+      "date": "2024-08-29",
+      "amount": 50000,
+      "periodStart": "2024-03-31",
+      "periodEnd": "2025-03-30",
+      "type": "Partial",
+      "notes": "Additional payment — may be advance toward 2025 period"
+    },
+    {
+      "id": "seed_5088203121a8",
+      "tenantId": "seed_d333f512e3a0",
+      "date": "2024-04-15",
+      "amount": 312000,
+      "periodStart": "2024-04-15",
+      "periodEnd": "2025-04-14",
+      "type": "Full",
+      "notes": "Annual rent"
+    },
+    {
+      "id": "seed_31dc08ee609c",
+      "tenantId": "seed_bc30c7b923d4",
+      "date": "2024-05-17",
+      "amount": 312000,
+      "periodStart": "2024-05-17",
+      "periodEnd": "2025-05-16",
+      "type": "Full",
+      "notes": "Annual rent"
+    },
+    {
+      "id": "seed_e6e2f8a850bc",
+      "tenantId": "seed_92077cd06dc4",
+      "date": "2024-12-07",
+      "amount": 200000,
+      "periodStart": "2024-12-07",
+      "periodEnd": "2025-12-06",
+      "type": "Full",
+      "notes": "Annual rent"
+    },
+    {
+      "id": "seed_b75548002415",
+      "tenantId": "seed_1bb94b986fb9",
+      "date": "2025-03-23",
+      "amount": 450000,
+      "periodStart": "2025-05-01",
+      "periodEnd": "2026-04-30",
+      "type": "Full",
+      "notes": "Annual rent"
+    },
+    {
+      "id": "seed_900a66568f90",
+      "tenantId": "seed_0b6cca1c15d3",
+      "date": "2025-07-01",
+      "amount": 345000,
+      "periodStart": "2025-03-31",
+      "periodEnd": "2026-03-30",
+      "type": "Full",
+      "notes": "Annual rent (upgraded to R&P at ₦345,000)"
+    },
+    {
+      "id": "seed_03334cdacc0a",
+      "tenantId": "seed_637b0d240992",
+      "date": "2025-05-30",
+      "amount": 100000,
+      "periodStart": "2025-03-31",
+      "periodEnd": "2026-03-30",
+      "type": "Partial",
+      "notes": "Partial payment"
+    },
+    {
+      "id": "seed_9003647bf5a9",
+      "tenantId": "seed_b5d27ab7eae6",
+      "date": "2025-05-28",
+      "amount": 250000,
+      "periodStart": "2025-05-28",
+      "periodEnd": "2026-05-27",
+      "type": "Full",
+      "notes": "Annual rent (new tenant)"
+    },
+    {
+      "id": "seed_58229392c8ef",
+      "tenantId": "seed_9ba07715b4d3",
+      "date": "2025-05-28",
+      "amount": 250000,
+      "periodStart": "2025-05-28",
+      "periodEnd": "2026-05-27",
+      "type": "Full",
+      "notes": "Annual rent (new tenant)"
+    },
+    {
+      "id": "seed_b1ac57c868e5",
+      "tenantId": "seed_7751c66c4781",
+      "date": "2025-06-24",
+      "amount": 350000,
+      "periodStart": "2025-06-24",
+      "periodEnd": "2026-06-23",
+      "type": "Full",
+      "notes": "Annual rent (new tenant)"
+    }
+  ],
+  "expenses": [
+    {
+      "id": "seed_fc078ea146a6",
+      "date": "2024-02-02",
+      "category": "Maintenance",
+      "description": "Cleaner Salary",
+      "amount": 6000
+    },
+    {
+      "id": "seed_29ecce5a1942",
+      "date": "2024-02-14",
+      "category": "Other",
+      "description": "Zoe's Fan",
+      "amount": 43000
+    },
+    {
+      "id": "seed_0d03b3ba4daf",
+      "date": "2024-02-15",
+      "category": "Other",
+      "description": "Mayor",
+      "amount": 50000
+    },
+    {
+      "id": "seed_b195d84ec75d",
+      "date": "2024-02-03",
+      "category": "Maintenance",
+      "description": "Salary",
+      "amount": 6000
+    },
+    {
+      "id": "seed_f9d6301b2ad8",
+      "date": "2024-03-04",
+      "category": "Maintenance",
+      "description": "Salary",
+      "amount": 6000
+    },
+    {
+      "id": "seed_93a7b2565ad2",
+      "date": "2024-04-04",
+      "category": "Repairs",
+      "description": "Plumbing",
+      "amount": 10000
+    },
+    {
+      "id": "seed_732d6f56cb1d",
+      "date": "2024-04-10",
+      "category": "Repairs",
+      "description": "POP LIGHT (Corper room)",
+      "amount": 5000
+    },
+    {
+      "id": "seed_39fc55616a87",
+      "date": "2024-04-22",
+      "category": "Repairs",
+      "description": "Borehole Cables",
+      "amount": 14000
+    },
+    {
+      "id": "seed_a4a7fa9883da",
+      "date": "2024-04-23",
+      "category": "Other",
+      "description": "Mom Pysio",
+      "amount": 50000
+    },
+    {
+      "id": "seed_38f696d6f0fd",
+      "date": "2024-04-29",
+      "category": "Maintenance",
+      "description": "Cleaner Salary",
+      "amount": 6000
+    },
+    {
+      "id": "seed_3b84d00e6cb1",
+      "date": "2024-04-30",
+      "category": "Other",
+      "description": "Investment",
+      "amount": 485700
+    },
+    {
+      "id": "seed_10fbcaae5f34",
+      "date": "2024-04-30",
+      "category": "Repairs",
+      "description": "Plumbing (outside)",
+      "amount": 10500
+    },
+    {
+      "id": "seed_16ba5e860449",
+      "date": "2024-04-22",
+      "category": "Other",
+      "description": "Dad's Phone",
+      "amount": 44200
+    },
+    {
+      "id": "seed_843ec8654881",
+      "date": "2024-05-22",
+      "category": "Other",
+      "description": "Dad Drugs",
+      "amount": 7200
+    },
+    {
+      "id": "seed_0f561e5bd977",
+      "date": "2024-05-25",
+      "category": "Maintenance",
+      "description": "Fumigation",
+      "amount": 20000
+    },
+    {
+      "id": "seed_f8a9b7d4cc8e",
+      "date": "2024-05-29",
+      "category": "Landlord",
+      "description": "Landlord",
+      "amount": 500000
+    },
+    {
+      "id": "seed_4f2359ae70c4",
+      "date": "2024-06-04",
+      "category": "Maintenance",
+      "description": "Cleaner Salary",
+      "amount": 6000
+    },
+    {
+      "id": "seed_6b75cd7bc022",
+      "date": "2024-06-17",
+      "category": "Repairs",
+      "description": "Plumbing (Dad room inside)",
+      "amount": 5000
+    },
+    {
+      "id": "seed_d1b444a8c91a",
+      "date": "2024-07-04",
+      "category": "Maintenance",
+      "description": "Cleaner Salary",
+      "amount": 6000
+    },
+    {
+      "id": "seed_e14263297daa",
+      "date": "2024-07-26",
+      "category": "Repairs",
+      "description": "Plumbing",
+      "amount": 12500
+    },
+    {
+      "id": "seed_d8f58a4e22ef",
+      "date": "2024-08-01",
+      "category": "Maintenance",
+      "description": "Cleaner Salary",
+      "amount": 6000
+    },
+    {
+      "id": "seed_c8418b2552bf",
+      "date": "2024-08-28",
+      "category": "Other",
+      "description": "Mom Check Up",
+      "amount": 50000
+    },
+    {
+      "id": "seed_815fdd4503dc",
+      "date": "2024-09-01",
+      "category": "Other",
+      "description": "Dad Leave Bonus",
+      "amount": 50000
+    },
+    {
+      "id": "seed_e11a0820fe21",
+      "date": "2024-09-01",
+      "category": "Maintenance",
+      "description": "Cleaner Salary",
+      "amount": 6000
+    },
+    {
+      "id": "seed_c54e5d94b6e0",
+      "date": "2024-09-09",
+      "category": "Legal",
+      "description": "Court Eviction Procedure",
+      "amount": 8000
+    },
+    {
+      "id": "seed_77c9d6af80a1",
+      "date": "2024-09-18",
+      "category": "Other",
+      "description": "Baba Akanji",
+      "amount": 20000
+    },
+    {
+      "id": "seed_7bcf7b8fd376",
+      "date": "2024-10-05",
+      "category": "Other",
+      "description": "Mom Drugs",
+      "amount": 20000
+    },
+    {
+      "id": "seed_786d347d98e0",
+      "date": "2024-10-09",
+      "category": "Repairs",
+      "description": "Plumbing",
+      "amount": 10000
+    },
+    {
+      "id": "seed_48e52128eb7d",
+      "date": "2024-10-01",
+      "category": "Maintenance",
+      "description": "Cleaner Salary",
+      "amount": 6000
+    },
+    {
+      "id": "seed_abc53f60e554",
+      "date": "2024-11-02",
+      "category": "Repairs",
+      "description": "Plumbing balance",
+      "amount": 8300
+    },
+    {
+      "id": "seed_08a52d4eef2e",
+      "date": "2024-11-07",
+      "category": "Other",
+      "description": "Mom's Phone",
+      "amount": 70000
+    },
+    {
+      "id": "seed_c49934374d2a",
+      "date": "2024-12-07",
+      "category": "Maintenance",
+      "description": "Cleaner Salary",
+      "amount": 6000
+    },
+    {
+      "id": "seed_a768ca782361",
+      "date": "2024-12-07",
+      "category": "Repairs",
+      "description": "Plumbing Mobola's flat",
+      "amount": 15000
+    },
+    {
+      "id": "seed_f3bed8be1fda",
+      "date": "2024-12-07",
+      "category": "Maintenance",
+      "description": "Jam Key",
+      "amount": 5000
+    },
+    {
+      "id": "seed_dcadb9c0181a",
+      "date": "2024-12-07",
+      "category": "Repairs",
+      "description": "Welder",
+      "amount": 4000
+    },
+    {
+      "id": "seed_6eb9a95ac705",
+      "date": "2024-12-07",
+      "category": "Maintenance",
+      "description": "1 Key Duplicate",
+      "amount": 2500
+    },
+    {
+      "id": "seed_6b4acfc24ca5",
+      "date": "2024-12-07",
+      "category": "Utility",
+      "description": "Netflix Mayor",
+      "amount": 7000
+    },
+    {
+      "id": "seed_3e957cac4289",
+      "date": "2024-12-07",
+      "category": "Other",
+      "description": "Solar Fan Mom",
+      "amount": 7500
+    },
+    {
+      "id": "seed_cba60e13bfd2",
+      "date": "2024-12-11",
+      "category": "Other",
+      "description": "Ope Xmas",
+      "amount": 100000
+    },
+    {
+      "id": "seed_907dd34720ac",
+      "date": "2024-12-11",
+      "category": "Repairs",
+      "description": "Surface Pump Repair",
+      "amount": 10000
+    },
+    {
+      "id": "seed_646b8cab0756",
+      "date": "2024-12-13",
+      "category": "Landlord",
+      "description": "Landlord",
+      "amount": 400000
+    },
+    {
+      "id": "seed_d3f87132389f",
+      "date": "2025-04-01",
+      "category": "Repairs",
+      "description": "Plumbing (cable change outside)",
+      "amount": 20000
+    },
+    {
+      "id": "seed_e5092ec7d012",
+      "date": "2025-04-01",
+      "category": "Maintenance",
+      "description": "Cleaners Salary",
+      "amount": 6000
+    },
+    {
+      "id": "seed_9e05561df0b4",
+      "date": "2025-02-02",
+      "category": "Repairs",
+      "description": "Cylinder Locks for Door (main entrance)",
+      "amount": 16000
+    },
+    {
+      "id": "seed_d4775338e7ad",
+      "date": "2025-02-02",
+      "category": "Repairs",
+      "description": "Plumbing Repairs (water pipe leak outside)",
+      "amount": 10000
+    },
+    {
+      "id": "seed_122c90999967",
+      "date": "2025-02-02",
+      "category": "Maintenance",
+      "description": "Cleaners Salary",
+      "amount": 6000
+    },
+    {
+      "id": "seed_3242399ff571",
+      "date": "2025-06-01",
+      "category": "Utility",
+      "description": "Netflix Mayor",
+      "amount": 6000
+    },
+    {
+      "id": "seed_21d67ee409cd",
+      "date": "2025-06-02",
+      "category": "Utility",
+      "description": "Netflix Mayor",
+      "amount": 6000
+    },
+    {
+      "id": "seed_dafefeee3878",
+      "date": "2025-06-03",
+      "category": "Maintenance",
+      "description": "Cleaners Salary",
+      "amount": 6000
+    },
+    {
+      "id": "seed_2f1337389b93",
+      "date": "2025-06-03",
+      "category": "Utility",
+      "description": "Netflix Mayor",
+      "amount": 7000
+    },
+    {
+      "id": "seed_f9873e545687",
+      "date": "2025-03-24",
+      "category": "Landlord",
+      "description": "Landlord",
+      "amount": 425000
+    },
+    {
+      "id": "seed_f89e62b543c6",
+      "date": "2025-03-24",
+      "category": "Other",
+      "description": "Outstanding balance",
+      "amount": 8400
+    },
+    {
+      "id": "seed_32b196b4e35b",
+      "date": "2025-05-28",
+      "category": "Landlord",
+      "description": "Landlord",
+      "amount": 600000
+    },
+    {
+      "id": "seed_1cffe7d1a210",
+      "date": "2025-05-30",
+      "category": "Landlord",
+      "description": "Landlord",
+      "amount": 100000
+    },
+    {
+      "id": "seed_f0ff96a0d57f",
+      "date": "2025-05-07",
+      "category": "Other",
+      "description": "Baba Akanji",
+      "amount": 50000
+    },
+    {
+      "id": "seed_54ae1f1ace8c",
+      "date": "2025-05-07",
+      "category": "Other",
+      "description": "Blessing",
+      "amount": 40000
+    },
+    {
+      "id": "seed_974d6817c052",
+      "date": "2025-05-07",
+      "category": "Repairs",
+      "description": "Plumbing Fix (New Family's Room)",
+      "amount": 20000
+    },
+    {
+      "id": "seed_1de9fd061321",
+      "date": "2025-08-06",
+      "category": "Repairs",
+      "description": "Plumbing Fix (Osoko David room)",
+      "amount": 20000
+    },
+    {
+      "id": "seed_acc46153303e",
+      "date": "2025-05-02",
+      "category": "Maintenance",
+      "description": "Cleaners Salary",
+      "amount": 6000
+    },
+    {
+      "id": "seed_ff3d7b324b99",
+      "date": "2025-09-07",
+      "category": "Landlord",
+      "description": "Landlord",
+      "amount": 385000
+    },
+    {
+      "id": "seed_40c016c5d58b",
+      "date": "2025-01-01",
+      "category": "Other",
+      "description": "Ope",
+      "amount": 90000
+    }
+  ]
+}
