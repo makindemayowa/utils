@@ -497,9 +497,10 @@ function renderDashboard() {
   const now    = todayStr();
   const in30   = addDays(now, 30);
 
-  const overdue  = active.filter(t => paymentStatus(t).key === 'overdue');
-  const partial  = active.filter(t => paymentStatus(t).key === 'partial');
-  const upcoming = active.filter(t => paymentStatus(t).key === 'paid' && nextDueDate(t) <= in30);
+  const overdue      = active.filter(t => paymentStatus(t).key === 'overdue');
+  const partial      = active.filter(t => paymentStatus(t).key === 'partial');
+  const upcoming     = active.filter(t => paymentStatus(t).key === 'paid' && nextDueDate(t) <= in30);
+  const startingSoon = active.filter(t => paymentStatus(t).key === 'upcoming');
 
   el.innerHTML = `
     <div class="cards">
@@ -560,6 +561,17 @@ function renderDashboard() {
         ${upcoming.map(t => `<div class="alert-row ar-blue">
           <span><strong>${t.name}</strong> · ${t.unit}</span>
           <span>Due ${fmtDate(nextDueDate(t))}</span>
+        </div>`).join('')}
+      </div>
+    </div>` : ''}
+
+    ${startingSoon.length ? `
+    <div class="section">
+      <div class="sec-head"><span class="sec-title" style="color:var(--primary-light)">Starting Soon (${startingSoon.length})</span><span style="font-size:12px;color:var(--muted)">Move-in not yet reached</span></div>
+      <div class="alert-list">
+        ${startingSoon.map(t => `<div class="alert-row ar-blue">
+          <span><strong>${t.name}</strong> · ${t.unit}</span>
+          <span>Move-in ${fmtDate(t.moveIn)} · ${naira(t.annualRent)}/yr · Paid</span>
         </div>`).join('')}
       </div>
     </div>` : ''}
