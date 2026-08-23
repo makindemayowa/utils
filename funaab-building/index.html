@@ -236,7 +236,7 @@
 <div class="tabs">
   <div class="tab active" id="tab-dashboard" onclick="showTab('dashboard')">Dashboard</div>
   <div class="tab"        id="tab-expenses"  onclick="showTab('expenses')">Expenses</div>
-  <div class="tab"        id="tab-transfers" onclick="showTab('transfers')">Transfers</div>
+  <div class="tab"        id="tab-transfers" onclick="showTab('transfers')">Funding</div>
   <div class="tab"        id="tab-settings"  onclick="showTab('settings')">Settings</div>
 </div>
 
@@ -274,7 +274,7 @@ const DEFAULT_PHASES = [
 ];
 
 // ─── State ────────────────────────────────────────────────────────────────────
-let db = { budget: 0, phases: [], expenses: [], transfers: [] };
+let db = { budget: 0, phases: [], expenses: [], transfers: [], funding: [] };
 let config = { scriptUrl: '' };
 let isSyncing = false;
 let activeTab = 'dashboard';
@@ -291,7 +291,7 @@ function saveConfig() {
 
 // ─── Cache (localStorage) ─────────────────────────────────────────────────────
 function mergeDefaults(raw) {
-  const out = Object.assign({ budget: 0, phases: [], expenses: [], transfers: [] }, raw);
+  const out = Object.assign({ budget: 0, phases: [], expenses: [], transfers: [], funding: [] }, raw);
   if (!out.phases || !out.phases.length) out.phases = DEFAULT_PHASES.map(p => Object.assign({}, p));
   return out;
 }
@@ -394,6 +394,8 @@ function avgRate() {
   const cTotal = totalCAD();
   return cTotal > 0 ? totalNGNReceived() / cTotal : 0;
 }
+function totalFunding()     { return db.funding.reduce((s, f) => s + Number(f.amount), 0); }
+function balanceAvailable() { return totalFunding() - totalSpent(); }
 function spentByPhase() {
   const map = {};
   db.phases.forEach(p => { map[p.id] = 0; });
@@ -458,6 +460,16 @@ function renderDashboard() {
       <div class="card-lbl">% Complete</div>
       <div class="card-val ${pctColor}">${db.budget > 0 ? pct.toFixed(1) + '%' : '—'}</div>
       <div class="card-sub">Of budget spent</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">Funding Received</div>
+      <div class="card-val blue">${naira(totalFunding())}</div>
+      <div class="card-sub">${db.funding.length} funding record${db.funding.length !== 1 ? 's' : ''}</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">Balance in Hand</div>
+      <div class="card-val ${balanceAvailable() >= 0 ? 'green' : 'red'}">${naira(balanceAvailable())}</div>
+      <div class="card-sub">Received − Spent</div>
     </div>
     <div class="card">
       <div class="card-lbl">Total Transferred</div>
@@ -526,15 +538,24 @@ function renderDashboard() {
     amt: '₦' + Math.round(t.ngnReceived / t.cadAmount).toLocaleString() + '/CA$',
     id: t.id
   }));
+  const fndActs = db.funding.map(f => ({
+    date: f.date,
+    type: 'funding',
+    label: 'Money received' + (f.notes ? ' — ' + f.notes : ''),
+    amt: naira(f.amount),
+    id: f.id
+  }));
 
-  const recent = [...expActs, ...trfActs].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 10);
+  const recent = [...expActs, ...trfActs, ...fndActs].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 10);
 
   let actRows = '';
   if (recent.length) {
     recent.forEach(r => {
       const badge = r.type === 'expense'
         ? '<span class="badge b-teal">Expense</span>'
-        : '<span class="badge b-blue">Transfer</span>';
+        : r.type === 'funding'
+          ? '<span class="badge b-orange">Funding</span>'
+          : '<span class="badge b-blue">Transfer</span>';
       actRows += `<div class="act-row">
         <span class="act-date">${fmtDate(r.date)}</span>
         ${badge}
@@ -746,6 +767,39 @@ function renderTransfers() {
     tRows = '<tr><td colspan="6"><div class="empty"><div class="empty-ico">💸</div>No transfers yet — log your first one</div></td></tr>';
   }
 
+  // Money received (direct-Naira funding)
+  const fndTot = totalFunding();
+  const fndSummary = `<div class="cards">
+    <div class="card">
+      <div class="card-lbl">Total Received (₦)</div>
+      <div class="card-val green">${fndTot > 0 ? naira(fndTot) : '—'}</div>
+      <div class="card-sub">${db.funding.length} record${db.funding.length !== 1 ? 's' : ''}</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">Balance in Hand</div>
+      <div class="card-val ${balanceAvailable() >= 0 ? 'green' : 'red'}">${naira(balanceAvailable())}</div>
+      <div class="card-sub">Received − Spent</div>
+    </div>
+  </div>`;
+
+  const fndSorted = [...db.funding].sort((a, b) => b.date.localeCompare(a.date));
+  let fRows = '';
+  if (fndSorted.length) {
+    fndSorted.forEach(f => {
+      fRows += `<tr>
+        <td>${fmtDate(f.date)}</td>
+        <td style="font-weight:600">${naira(f.amount)}</td>
+        <td>${f.notes || '—'}</td>
+        <td style="white-space:nowrap">
+          <button class="abn" onclick="openFundingForm('${f.id}')" title="Edit">✏</button>
+          <button class="abn" onclick="deleteFunding('${f.id}')" title="Delete">🗑</button>
+        </td>
+      </tr>`;
+    });
+  } else {
+    fRows = '<tr><td colspan="4"><div class="empty"><div class="empty-ico">💰</div>No funding recorded yet</div></td></tr>';
+  }
+
   el.innerHTML = summary + `<div class="section">
     <div class="sec-head">
       <span class="sec-title">CAD → NGN Transfers</span>
@@ -755,7 +809,68 @@ function renderTransfers() {
       <thead><tr><th>Date</th><th>CAD Sent</th><th>NGN Received</th><th>Rate (₦/CA$)</th><th>Notes</th><th></th></tr></thead>
       <tbody>${tRows}</tbody>
     </table></div>
+  </div>` + fndSummary + `<div class="section">
+    <div class="sec-head">
+      <span class="sec-title">Money Received (₦)</span>
+      <button class="btn btn-primary btn-sm" onclick="openFundingForm()">+ Add Funding</button>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Date</th><th>Amount</th><th>Notes</th><th></th></tr></thead>
+      <tbody>${fRows}</tbody>
+    </table></div>
   </div>`;
+}
+
+function openFundingForm(id) {
+  const f = id ? db.funding.find(x => x.id === id) : null;
+
+  document.getElementById('m-title').textContent = f ? 'Edit Funding' : 'Add Funding';
+  document.getElementById('m-body').innerHTML = `
+    <div class="fg">
+      <label>Date</label>
+      <input type="date" id="f-date" value="${f ? f.date : todayStr()}">
+    </div>
+    <div class="fg">
+      <label>Amount (₦)</label>
+      <input type="number" id="f-amount" placeholder="0" min="0" value="${f ? f.amount : ''}">
+    </div>
+    <div class="fg">
+      <label>Notes</label>
+      <input type="text" id="f-notes" placeholder="e.g. 1st money sent" value="${f ? f.notes || '' : ''}">
+    </div>`;
+  document.getElementById('m-foot').innerHTML = `
+    <button class="btn btn-ghost" onclick="hideModal()">Cancel</button>
+    <button class="btn btn-primary" onclick="saveFunding('${id || ''}')">Save</button>`;
+  showModal();
+}
+
+function saveFunding(editId) {
+  const date   = document.getElementById('f-date').value;
+  const amount = parseFloat(document.getElementById('f-amount').value);
+  const notes  = document.getElementById('f-notes').value.trim();
+
+  if (!date || isNaN(amount) || amount <= 0) {
+    alert('Please fill in Date and Amount.');
+    return;
+  }
+
+  if (editId) {
+    const idx = db.funding.findIndex(f => f.id === editId);
+    if (idx !== -1) db.funding[idx] = { ...db.funding[idx], date, amount, notes };
+  } else {
+    db.funding.push({ id: uid(), date, amount, notes });
+  }
+
+  save();
+  hideModal();
+  render();
+}
+
+function deleteFunding(id) {
+  if (!confirm('Delete this funding record?')) return;
+  db.funding = db.funding.filter(f => f.id !== id);
+  save();
+  render();
 }
 
 function openTransferForm(id) {
