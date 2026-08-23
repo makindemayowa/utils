@@ -115,6 +115,17 @@
     .blue  { color: var(--primary); }
     .amber { color: var(--warning); }
 
+    /* ── Balance banner ── */
+    .balance-banner { border-radius: 10px; box-shadow: var(--shadow); padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .balance-banner .balance-lbl { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .balance-banner .balance-val { font-size: 30px; font-weight: 800; }
+    .bal-pos { background: #d5f5e3; }
+    .bal-pos .balance-lbl { color: #196f3d; }
+    .bal-pos .balance-val { color: var(--success); }
+    .bal-neg { background: #fadbd8; }
+    .bal-neg .balance-lbl { color: #922b21; }
+    .bal-neg .balance-val { color: var(--danger); }
+
     /* ── Section ── */
     .section { background: var(--card-bg); border-radius: 10px; box-shadow: var(--shadow); margin-bottom: 16px; overflow: hidden; }
     .sec-head { padding: 13px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
@@ -191,7 +202,7 @@
     .fg { margin-bottom: 14px; }
     .fg:last-child { margin-bottom: 0; }
     label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 5px; }
-    input, select, textarea { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; color: var(--text); background: #fff; outline: none; }
+    input, select, textarea { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 16px; color: var(--text); background: #fff; outline: none; }
     input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(27,67,50,0.12); }
     input[readonly] { background: #f8f9fa; color: var(--muted); cursor: default; }
     .fr { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -454,11 +465,11 @@ function renderDashboard() {
       <div class="card-val blue">${naira(totalFunding())}</div>
       <div class="card-sub">${db.funding.length} funding record${db.funding.length !== 1 ? 's' : ''}</div>
     </div>
-    <div class="card">
-      <div class="card-lbl">Balance in Hand</div>
-      <div class="card-val ${balanceAvailable() >= 0 ? 'green' : 'red'}">${naira(balanceAvailable())}</div>
-      <div class="card-sub">Received − Spent</div>
-    </div>
+  </div>`;
+
+  const balanceBanner = `<div class="balance-banner ${balanceAvailable() >= 0 ? 'bal-pos' : 'bal-neg'}">
+    <span class="balance-lbl">Balance in Hand</span>
+    <span class="balance-val">${naira(balanceAvailable())}</span>
   </div>`;
 
   // Progress bar
@@ -541,7 +552,7 @@ function renderDashboard() {
     ${actRows}
   </div>`;
 
-  el.innerHTML = cards + progressBar + phaseSummary + recentSection;
+  el.innerHTML = balanceBanner + cards + progressBar + phaseSummary + recentSection;
 }
 
 // ─── Expenses ─────────────────────────────────────────────────────────────────
