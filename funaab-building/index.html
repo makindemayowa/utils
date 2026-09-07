@@ -391,6 +391,9 @@ function phaseName(phaseId) {
   const p = db.phases.find(p => p.id === phaseId);
   return p ? p.name : 'Unknown';
 }
+function enteredAt(record) {
+  return record.createdAt || new Date(record.date + 'T12:00:00').getTime();
+}
 
 // ─── Computed totals ──────────────────────────────────────────────────────────
 function totalSpent()       { return db.expenses.reduce((s, e) => s + Number(e.amount), 0); }
@@ -512,9 +515,10 @@ function renderDashboard() {
     </table></div>
   </div>`;
 
-  // Recent activity (last 10 combined)
+  // Recent activity — most recently ENTERED records, not the ones with the latest transaction date
   const expActs = db.expenses.map(e => ({
     date: e.date,
+    enteredAt: enteredAt(e),
     type: 'expense',
     label: (phaseName(e.phaseId) + ' — ' + e.category + (e.description ? ': ' + e.description : '')),
     amt: naira(e.amount),
@@ -522,13 +526,14 @@ function renderDashboard() {
   }));
   const fndActs = db.funding.map(f => ({
     date: f.date,
+    enteredAt: enteredAt(f),
     type: 'funding',
     label: 'Money received' + (f.notes ? ' — ' + f.notes : ''),
     amt: naira(f.amount),
     id: f.id
   }));
 
-  const recent = [...expActs, ...fndActs].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 10);
+  const recent = [...expActs, ...fndActs].sort((a, b) => b.enteredAt - a.enteredAt).slice(0, 10);
 
   let actRows = '';
   if (recent.length) {
@@ -686,7 +691,7 @@ function saveExpense(editId) {
     const idx = db.expenses.findIndex(e => e.id === editId);
     if (idx !== -1) db.expenses[idx] = { ...db.expenses[idx], date, phaseId, category: cat, description: desc, vendor, amount };
   } else {
-    db.expenses.push({ id: uid(), date, phaseId, category: cat, description: desc, vendor, amount });
+    db.expenses.push({ id: uid(), date, phaseId, category: cat, description: desc, vendor, amount, createdAt: Date.now() });
   }
 
   save();
@@ -787,7 +792,7 @@ function saveFunding(editId) {
     const idx = db.funding.findIndex(f => f.id === editId);
     if (idx !== -1) db.funding[idx] = { ...db.funding[idx], date, amount, notes };
   } else {
-    db.funding.push({ id: uid(), date, amount, notes });
+    db.funding.push({ id: uid(), date, amount, notes, createdAt: Date.now() });
   }
 
   save();
