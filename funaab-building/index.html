@@ -168,7 +168,7 @@
     .btn-success { background: #27ae60; color: #fff; }
     .btn-ghost   { background: transparent; border: 1px solid var(--border); color: var(--text); }
     .btn-sm      { padding: 5px 11px; font-size: 12px; }
-    .abn { background: none; border: none; cursor: pointer; padding: 3px 6px; border-radius: 4px; font-size: 13px; color: var(--muted); line-height: 1; }
+    .abn { background: none; border: none; cursor: pointer; padding: 8px; margin: -8px 0; border-radius: 4px; font-size: 14px; color: var(--muted); line-height: 1; min-width: 36px; min-height: 36px; }
     .abn:hover { background: #f0f0f0; color: var(--text); }
     .abn:disabled { opacity: 0.3; cursor: default; }
     .abn:disabled:hover { background: none; }
@@ -183,6 +183,17 @@
     .act-date { color: var(--muted); font-size: 12px; min-width: 90px; }
     .act-lbl { flex: 1; }
     .act-amt { font-weight: 700; text-align: right; white-space: nowrap; }
+
+    /* ── History log ── */
+    .hist-card { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; }
+    .hist-card:last-child { border-bottom: none; }
+    .hist-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+    .hist-ts { font-size: 12px; color: var(--muted); margin-left: auto; white-space: nowrap; }
+    .hist-changes { display: flex; flex-direction: column; gap: 4px; }
+    .hist-change-row { font-size: 13px; line-height: 1.5; word-break: break-word; }
+    .hist-change-row .hc-label { font-weight: 600; }
+    .hist-change-row .hc-from { color: var(--danger); text-decoration: line-through; }
+    .hist-change-row .hc-to { color: var(--success); font-weight: 600; }
 
     /* ── Empty state ── */
     .empty { text-align: center; padding: 40px 20px; color: var(--muted); }
@@ -248,6 +259,7 @@
   <div class="tab active" id="tab-dashboard" onclick="showTab('dashboard')">Dashboard</div>
   <div class="tab"        id="tab-expenses"  onclick="showTab('expenses')">Expenses</div>
   <div class="tab"        id="tab-transfers" onclick="showTab('transfers')">Funding</div>
+  <div class="tab"        id="tab-history"   onclick="showTab('history')">History</div>
   <div class="tab"        id="tab-settings"  onclick="showTab('settings')">Settings</div>
 </div>
 
@@ -255,6 +267,7 @@
   <div id="view-dashboard"></div>
   <div id="view-expenses"  style="display:none"></div>
   <div id="view-transfers" style="display:none"></div>
+  <div id="view-history"   style="display:none"></div>
   <div id="view-settings"  style="display:none"></div>
 </div>
 
@@ -285,7 +298,7 @@ const DEFAULT_PHASES = [
 ];
 
 // ─── State ────────────────────────────────────────────────────────────────────
-let db = { budget: 0, phases: [], expenses: [], transfers: [], funding: [] };
+let db = { budget: 0, phases: [], expenses: [], transfers: [], funding: [], auditLog: [] };
 let config = { scriptUrl: '' };
 let isSyncing = false;
 let activeTab = 'dashboard';
@@ -302,7 +315,7 @@ function saveConfig() {
 
 // ─── Cache (localStorage) ─────────────────────────────────────────────────────
 function mergeDefaults(raw) {
-  const out = Object.assign({ budget: 0, phases: [], expenses: [], transfers: [], funding: [] }, raw);
+  const out = Object.assign({ budget: 0, phases: [], expenses: [], transfers: [], funding: [], auditLog: [] }, raw);
   if (!out.phases || !out.phases.length) out.phases = DEFAULT_PHASES.map(p => Object.assign({}, p));
   return out;
 }
@@ -395,6 +408,41 @@ function enteredAt(record) {
   return record.createdAt || new Date(record.date + 'T12:00:00').getTime();
 }
 
+// ─── Audit log ────────────────────────────────────────────────────────────────
+const EXPENSE_FIELDS = [
+  { key: 'date',        label: 'Date',        format: fmtDate },
+  { key: 'phaseId',     label: 'Phase',       format: phaseName },
+  { key: 'category',    label: 'Category',    format: v => v || '—' },
+  { key: 'description', label: 'Description', format: v => v || '—' },
+  { key: 'vendor',      label: 'Vendor',      format: v => v || '—' },
+  { key: 'amount',      label: 'Amount',      format: naira }
+];
+const FUNDING_FIELDS = [
+  { key: 'date',   label: 'Date',   format: fmtDate },
+  { key: 'amount', label: 'Amount', format: naira },
+  { key: 'notes',  label: 'Notes',  format: v => v || '—' }
+];
+
+function diffRecord(before, after, fieldDefs) {
+  const changes = [];
+  fieldDefs.forEach(({ key, label, format }) => {
+    const a = before[key] == null ? '' : before[key];
+    const b = after[key]  == null ? '' : after[key];
+    if (a !== b) changes.push({ field: key, label, from: format(before[key]), to: format(after[key]) });
+  });
+  return changes;
+}
+
+function logUpdate(entityType, entityId, changes) {
+  if (!changes.length) return;
+  db.auditLog.push({ id: uid(), ts: Date.now(), entityType, entityId, action: 'update', changes });
+}
+
+function logDelete(entityType, entityId, record, fieldDefs) {
+  const snapshot = fieldDefs.map(({ key, label, format }) => ({ label, value: format(record[key]) }));
+  db.auditLog.push({ id: uid(), ts: Date.now(), entityType, entityId, action: 'delete', snapshot });
+}
+
 // ─── Computed totals ──────────────────────────────────────────────────────────
 function totalSpent()       { return db.expenses.reduce((s, e) => s + Number(e.amount), 0); }
 function remaining()        { return db.budget - totalSpent(); }
@@ -424,6 +472,7 @@ function render() {
   if (activeTab === 'dashboard') renderDashboard();
   if (activeTab === 'expenses')  renderExpenses();
   if (activeTab === 'transfers') renderTransfers();
+  if (activeTab === 'history')   renderHistory();
   if (activeTab === 'settings')  renderSettings();
 }
 
@@ -598,6 +647,7 @@ function renderExpenses() {
         <td style="white-space:nowrap">
           <button class="abn" onclick="openExpenseForm('${e.id}')" title="Edit">✏</button>
           <button class="abn" onclick="deleteExpense('${e.id}')" title="Delete">🗑</button>
+          <button class="abn" onclick="openRecordHistory('expense','${e.id}')" title="History">🕓</button>
         </td>
       </tr>`;
     });
@@ -689,7 +739,12 @@ function saveExpense(editId) {
 
   if (editId) {
     const idx = db.expenses.findIndex(e => e.id === editId);
-    if (idx !== -1) db.expenses[idx] = { ...db.expenses[idx], date, phaseId, category: cat, description: desc, vendor, amount };
+    if (idx !== -1) {
+      const before = db.expenses[idx];
+      const after  = { ...before, date, phaseId, category: cat, description: desc, vendor, amount };
+      logUpdate('expense', editId, diffRecord(before, after, EXPENSE_FIELDS));
+      db.expenses[idx] = after;
+    }
   } else {
     db.expenses.push({ id: uid(), date, phaseId, category: cat, description: desc, vendor, amount, createdAt: Date.now() });
   }
@@ -701,6 +756,8 @@ function saveExpense(editId) {
 
 function deleteExpense(id) {
   if (!confirm('Delete this expense?')) return;
+  const rec = db.expenses.find(e => e.id === id);
+  if (rec) logDelete('expense', id, rec, EXPENSE_FIELDS);
   db.expenses = db.expenses.filter(e => e.id !== id);
   save();
   render();
@@ -736,6 +793,7 @@ function renderTransfers() {
         <td style="white-space:nowrap">
           <button class="abn" onclick="openFundingForm('${f.id}')" title="Edit">✏</button>
           <button class="abn" onclick="deleteFunding('${f.id}')" title="Delete">🗑</button>
+          <button class="abn" onclick="openRecordHistory('funding','${f.id}')" title="History">🕓</button>
         </td>
       </tr>`;
     });
@@ -790,7 +848,12 @@ function saveFunding(editId) {
 
   if (editId) {
     const idx = db.funding.findIndex(f => f.id === editId);
-    if (idx !== -1) db.funding[idx] = { ...db.funding[idx], date, amount, notes };
+    if (idx !== -1) {
+      const before = db.funding[idx];
+      const after  = { ...before, date, amount, notes };
+      logUpdate('funding', editId, diffRecord(before, after, FUNDING_FIELDS));
+      db.funding[idx] = after;
+    }
   } else {
     db.funding.push({ id: uid(), date, amount, notes, createdAt: Date.now() });
   }
@@ -802,9 +865,63 @@ function saveFunding(editId) {
 
 function deleteFunding(id) {
   if (!confirm('Delete this funding record?')) return;
+  const rec = db.funding.find(f => f.id === id);
+  if (rec) logDelete('funding', id, rec, FUNDING_FIELDS);
   db.funding = db.funding.filter(f => f.id !== id);
   save();
   render();
+}
+
+// ─── History (audit log) ───────────────────────────────────────────────────────
+function fmtDateTime(ts) {
+  return new Date(ts).toLocaleString('en-GB', {
+    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
+}
+
+function historyEntryHtml(entry) {
+  const typeBadge   = entry.entityType === 'expense' ? '<span class="badge b-teal">Expense</span>' : '<span class="badge b-orange">Funding</span>';
+  const actionBadge = entry.action === 'delete' ? '<span class="badge b-red">Deleted</span>' : '<span class="badge b-amber">Edited</span>';
+
+  let body = '';
+  if (entry.action === 'update') {
+    body = `<div class="hist-changes">${entry.changes.map(c => `
+      <div class="hist-change-row"><span class="hc-label">${c.label}:</span> <span class="hc-from">${c.from}</span> → <span class="hc-to">${c.to}</span></div>
+    `).join('')}</div>`;
+  } else {
+    body = `<div class="hist-changes">${entry.snapshot.map(s => `
+      <div class="hist-change-row"><span class="hc-label">${s.label}:</span> ${s.value}</div>
+    `).join('')}</div>`;
+  }
+
+  return `<div class="hist-card">
+    <div class="hist-head">${typeBadge}${actionBadge}<span class="hist-ts">${fmtDateTime(entry.ts)}</span></div>
+    ${body}
+  </div>`;
+}
+
+function renderHistory() {
+  const el = document.getElementById('view-history');
+  const sorted = [...db.auditLog].sort((a, b) => b.ts - a.ts);
+
+  const rows = sorted.length
+    ? sorted.map(historyEntryHtml).join('')
+    : '<div class="empty"><div class="empty-ico">🕓</div>No edits or deletions recorded yet</div>';
+
+  el.innerHTML = `<div class="section">
+    <div class="sec-head"><span class="sec-title">Change History</span></div>
+    ${rows}
+  </div>`;
+}
+
+function openRecordHistory(entityType, entityId) {
+  const entries = db.auditLog.filter(a => a.entityType === entityType && a.entityId === entityId).sort((a, b) => b.ts - a.ts);
+  document.getElementById('m-title').textContent = 'Edit History';
+  document.getElementById('m-body').innerHTML = entries.length
+    ? entries.map(historyEntryHtml).join('')
+    : '<div class="empty" style="padding:20px"><div class="empty-ico">🕓</div>No edits recorded — unchanged since it was entered</div>';
+  document.getElementById('m-foot').innerHTML = `<button class="btn btn-ghost" onclick="hideModal()">Close</button>`;
+  showModal();
 }
 
 // ─── Settings ─────────────────────────────────────────────────────────────────
