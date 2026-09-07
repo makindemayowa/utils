@@ -189,6 +189,7 @@
     .hist-card:last-child { border-bottom: none; }
     .hist-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
     .hist-ts { font-size: 12px; color: var(--muted); margin-left: auto; white-space: nowrap; }
+    .hist-label { font-weight: 700; font-size: 13px; margin-bottom: 8px; }
     .hist-changes { display: flex; flex-direction: column; gap: 4px; }
     .hist-change-row { font-size: 13px; line-height: 1.5; word-break: break-word; }
     .hist-change-row .hc-label { font-weight: 600; }
@@ -405,7 +406,7 @@ function phaseName(phaseId) {
   return p ? p.name : 'Unknown';
 }
 function enteredAt(record) {
-  return record.createdAt || new Date(record.date + 'T12:00:00').getTime();
+  return record.updatedAt || record.createdAt || new Date(record.date + 'T12:00:00').getTime();
 }
 
 // ─── Audit log ────────────────────────────────────────────────────────────────
@@ -433,14 +434,21 @@ function diffRecord(before, after, fieldDefs) {
   return changes;
 }
 
-function logUpdate(entityType, entityId, changes) {
-  if (!changes.length) return;
-  db.auditLog.push({ id: uid(), ts: Date.now(), entityType, entityId, action: 'update', changes });
+function expenseLabel(rec) {
+  return phaseName(rec.phaseId) + ' — ' + rec.category + (rec.description ? ': ' + rec.description : '') + (rec.vendor ? ' (' + rec.vendor + ')' : '');
+}
+function fundingLabel(rec) {
+  return 'Money received' + (rec.notes ? ' — ' + rec.notes : '');
 }
 
-function logDelete(entityType, entityId, record, fieldDefs) {
-  const snapshot = fieldDefs.map(({ key, label, format }) => ({ label, value: format(record[key]) }));
-  db.auditLog.push({ id: uid(), ts: Date.now(), entityType, entityId, action: 'delete', snapshot });
+function logUpdate(entityType, entityId, changes, label) {
+  if (!changes.length) return;
+  db.auditLog.push({ id: uid(), ts: Date.now(), entityType, entityId, action: 'update', label, changes });
+}
+
+function logDelete(entityType, entityId, record, fieldDefs, label) {
+  const snapshot = fieldDefs.map(({ key, label: fieldLabel, format }) => ({ label: fieldLabel, value: format(record[key]) }));
+  db.auditLog.push({ id: uid(), ts: Date.now(), entityType, entityId, action: 'delete', label, snapshot });
 }
 
 // ─── Computed totals ──────────────────────────────────────────────────────────
@@ -568,6 +576,7 @@ function renderDashboard() {
   const expActs = db.expenses.map(e => ({
     date: e.date,
     enteredAt: enteredAt(e),
+    edited: !!e.updatedAt,
     type: 'expense',
     label: (phaseName(e.phaseId) + ' — ' + e.category + (e.description ? ': ' + e.description : '')),
     amt: naira(e.amount),
@@ -576,6 +585,7 @@ function renderDashboard() {
   const fndActs = db.funding.map(f => ({
     date: f.date,
     enteredAt: enteredAt(f),
+    edited: !!f.updatedAt,
     type: 'funding',
     label: 'Money received' + (f.notes ? ' — ' + f.notes : ''),
     amt: naira(f.amount),
@@ -590,9 +600,10 @@ function renderDashboard() {
       const badge = r.type === 'expense'
         ? '<span class="badge b-teal">Expense</span>'
         : '<span class="badge b-orange">Funding</span>';
+      const editedBadge = r.edited ? '<span class="badge b-amber">Edited</span>' : '';
       actRows += `<div class="act-row">
         <span class="act-date">${fmtDate(r.date)}</span>
-        ${badge}
+        ${badge}${editedBadge}
         <span class="act-lbl">${r.label}</span>
         <span class="act-amt">${r.amt}</span>
       </div>`;
@@ -742,7 +753,11 @@ function saveExpense(editId) {
     if (idx !== -1) {
       const before = db.expenses[idx];
       const after  = { ...before, date, phaseId, category: cat, description: desc, vendor, amount };
-      logUpdate('expense', editId, diffRecord(before, after, EXPENSE_FIELDS));
+      const changes = diffRecord(before, after, EXPENSE_FIELDS);
+      if (changes.length) {
+        logUpdate('expense', editId, changes, expenseLabel(after));
+        after.updatedAt = Date.now();
+      }
       db.expenses[idx] = after;
     }
   } else {
@@ -757,7 +772,7 @@ function saveExpense(editId) {
 function deleteExpense(id) {
   if (!confirm('Delete this expense?')) return;
   const rec = db.expenses.find(e => e.id === id);
-  if (rec) logDelete('expense', id, rec, EXPENSE_FIELDS);
+  if (rec) logDelete('expense', id, rec, EXPENSE_FIELDS, expenseLabel(rec));
   db.expenses = db.expenses.filter(e => e.id !== id);
   save();
   render();
@@ -851,7 +866,11 @@ function saveFunding(editId) {
     if (idx !== -1) {
       const before = db.funding[idx];
       const after  = { ...before, date, amount, notes };
-      logUpdate('funding', editId, diffRecord(before, after, FUNDING_FIELDS));
+      const changes = diffRecord(before, after, FUNDING_FIELDS);
+      if (changes.length) {
+        logUpdate('funding', editId, changes, fundingLabel(after));
+        after.updatedAt = Date.now();
+      }
       db.funding[idx] = after;
     }
   } else {
@@ -866,7 +885,7 @@ function saveFunding(editId) {
 function deleteFunding(id) {
   if (!confirm('Delete this funding record?')) return;
   const rec = db.funding.find(f => f.id === id);
-  if (rec) logDelete('funding', id, rec, FUNDING_FIELDS);
+  if (rec) logDelete('funding', id, rec, FUNDING_FIELDS, fundingLabel(rec));
   db.funding = db.funding.filter(f => f.id !== id);
   save();
   render();
@@ -896,6 +915,7 @@ function historyEntryHtml(entry) {
 
   return `<div class="hist-card">
     <div class="hist-head">${typeBadge}${actionBadge}<span class="hist-ts">${fmtDateTime(entry.ts)}</span></div>
+    ${entry.label ? `<div class="hist-label">${entry.label}</div>` : ''}
     ${body}
   </div>`;
 }
